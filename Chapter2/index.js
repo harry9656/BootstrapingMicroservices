@@ -3,7 +3,11 @@ const fs = require('fs');
 
 const app = express();
 
-const PORT = 3000;
+if(!process.env.PORT){
+    throw new Error("Please specify the port number for the HTTP server with the environment varibale PORT.");
+}
+
+const PORT = process.env.PORT;
 
 app.get('/video', (req, res) => {
     const PATH = "./video/SampleVideo_1280x720_1mb.mp4";
