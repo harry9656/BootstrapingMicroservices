@@ -10,7 +10,7 @@ const PORT = process.env.PORT ? process.env.PORT : 3000;
 
 
 app.get('/video', (req, res) => {
-    const PATH = "../video/SampleVideo_1280x720_1mb.mp4";
+    const PATH = "video/SampleVideo_1280x720_1mb.mp4";
     fs.stat(PATH, (err, stats) => {
         if(err){
             console.log("An error occured");
