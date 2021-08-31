@@ -4,13 +4,13 @@ const fs = require('fs');
 const app = express();
 
 if(!process.env.PORT){
-    throw new Error("Please specify the port number for the HTTP server with the environment varibale PORT.");
+    console.log("Port not provided using the defaul port number 3000");
 }
+const PORT = process.env.PORT ? process.env.PORT : 3000;
 
-const PORT = process.env.PORT;
 
 app.get('/video', (req, res) => {
-    const PATH = "./video/SampleVideo_1280x720_1mb.mp4";
+    const PATH = "../video/SampleVideo_1280x720_1mb.mp4";
     fs.stat(PATH, (err, stats) => {
         if(err){
             console.log("An error occured");
