@@ -1,5 +1,19 @@
 {
   "dependencies": {
-    "azure-storage": "^2.10.4"
+    "azure-storage": "^2.10.4",
+    "express": "^4.17.1"
+  },
+  "name": "azure-storage",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^2.0.12"
   }
 }
