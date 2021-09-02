@@ -1,32 +1,64 @@
 const express = require('express');
-const fs = require('fs');
+const http = require('http');
+const mongodb = require('mongodb');
 
 const app = express();
 
-if(!process.env.PORT){
+if (!process.env.PORT) {
     console.log("Port not provided using the defaul port number 3000");
 }
 const PORT = process.env.PORT ? process.env.PORT : 3000;
+const VIDEO_STORAGE_HOST = process.env.VIDEO_STORAGE_HOST;
+const VIDEO_STORAGE_PORT = parseInt(process.env.VIDEO_STORAGE_PORT);
+const DBHOST = process.env.DBHOST;
+const DBNAME = process.env.DBNAME;
 
+console.log(`Database host:${DBHOST}`);
 
-app.get('/video', (req, res) => {
-    const PATH = "video/SampleVideo_1280x720_1mb.mp4";
-    fs.stat(PATH, (err, stats) => {
-        if(err){
-            console.log("An error occured");
-            res.sendStatus(500);
-            return;
-        }
+function main() {
+    return mongodb.MongoClient.connect(DBHOST)
+        .then(client => {
+            const db = client.db(DBNAME);
+            const videosCollection = db.collection("videos");
 
-        res.writeHead(200, {
-            "Content-Length": stats.size,
-            "Content-Type": "video/mp4",
-        });
+            app.get('/video', (req, res) => {
+                const videoId = new mongodb.ObjectId(req.query.id);
+                videosCollection.findOne({ _id: videoId })
+                    .then(videoRecord => {
+                        if (!videoRecord) {
+                            res.sendStatus(404);
+                            return;
+                        }
+                        const forwardRequest = http.request(
+                            {
+                                host: VIDEO_STORAGE_HOST,
+                                port: VIDEO_STORAGE_PORT,
+                                path: `/video?path=${videoRecord.videoPath}`,
+                                method: 'GET',
+                                headers: req.headers
+                            },
+                            forwardResponse => {
+                                res.writeHeader(forwardResponse.statusCode, forwardResponse.headers);
+                                forwardResponse.pipe(res);
+                            }
+                        );
+                        req.pipe(forwardRequest);
+                    })
+                    .catch(err => {
+                        console.error("Database query failed.");
+                        console.error("err && err.stack || err");
+                        res.sendStatus(500);
+                    });
 
-        fs.createReadStream(PATH).pipe(res);
+            });
+            app.listen(PORT, () => {
+                console.log(`REST interface loaded :)`);
+            });
+        })
+}
+
+main().then(() => console.log("Microservice online."))
+    .catch(err => {
+        console.error("Microservice failed to start :(");
+        console.error(err && err.stack || err);
     })
-});
-
-app.listen(PORT, () => {
-    console.log(`Example app listening on port ${PORT}`);
-});

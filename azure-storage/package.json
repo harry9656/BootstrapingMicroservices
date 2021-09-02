@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "azure-storage": "^2.10.4",
+    "@azure/storage-blob": "^12.7.0",
     "express": "^4.17.1"
   },
   "name": "azure-storage",
